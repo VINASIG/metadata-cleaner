@@ -1,0 +1,13 @@
+{
+  "bundleSha256": "b559621eb453eee3e2728901d1dd9bd0dd89d0451e6243ce40182e1c9bdb31d7",
+  "sourceRef": "sha256:c41978c35b60450d8efebc66c7d022dc6ae4b60997f35cc763e4f865206ce7e8",
+  "sourceKind": "local-content-snapshot",
+  "sourceCommit": "084ff42363e5f15eccd18b492483af71aef33daf",
+  "reviewedChanges": "Owner-requested Repo details clarification",
+  "format": 1,
+  "adoptedDate": "2026-10-06",
+  "profile": "web-typescript",
+  "version": "0.1.0",
+  "repository": "VINASIG/agent-standards",
+  "manifestSha256": "3aff3405c199211aec1c118be254dbeef5059ead492c00910a99d91c47976582"
+}

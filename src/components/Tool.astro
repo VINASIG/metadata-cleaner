@@ -1,0 +1,313 @@
+---
+import { Upload, Download, Trash, FileSearch } from '@lucide/astro';
+import SiteFooter from './SiteFooter.astro';
+import SitePreferences from './SitePreferences.astro';
+import ThemeInit from './ThemeInit.astro';
+import { copy } from '../lib/copy.ts';
+import { mode, origin, repository, companion } from '../lib/site.ts';
+import '../styles/tokens.css';
+import '../styles/app.css';
+import '../styles/control-surfaces.css';
+import '../styles/metadata.css';
+import '../styles/site-chrome.css';
+interface Props {
+  lang: 'vi' | 'en';
+}
+const { lang } = Astro.props;
+const c = copy[lang];
+const title = mode === 'cleaner' ? c.cleanerTitle : c.readerTitle;
+const description =
+  mode === 'cleaner' ? c.cleanerDescription : c.readerDescription;
+const canonical = origin + (lang === 'en' ? 'en/' : '');
+const revision = process.env['GITHUB_SHA'];
+const source =
+  revision && /^[a-f0-9]{40}$/.test(revision)
+    ? `${repository}/tree/${revision}`
+    : repository;
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: title,
+  url: canonical,
+  description,
+  inLanguage: lang,
+  applicationCategory: 'UtilitiesApplication',
+  operatingSystem: 'Web browser',
+  isAccessibleForFree: true,
+  publisher: {
+    '@type': 'Organization',
+    name: 'VINASIG',
+    url: 'https://vinasig.io.vn/',
+  },
+};
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <ThemeInit />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="referrer" content="no-referrer" />
+    {revision && <meta name="source-revision" content={revision} />}
+    <title>{title} | VINASIG</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="vi" href={origin} />
+    <link rel="alternate" hreflang="en" href={`${origin}en/`} />
+    <link rel="alternate" hreflang="x-default" href={origin} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={`${title} | VINASIG`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={lang === 'vi' ? 'vi_VN' : 'en_US'} />
+    <link rel="icon" type="image/svg+xml" href="/brand/mark.svg" />
+    {[16, 32, 48].map((size) => (
+      <link
+        rel="icon"
+        type="image/png"
+        sizes={`${size}x${size}`}
+        href={`/brand/favicon-${size}.png`}
+      />
+    ))}
+    <link
+      rel="preload"
+      href="/fonts/SpaceGrotesk-VariableFont_wght.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/fonts/font.css" />
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </head>
+  <body data-language={lang} data-mode={mode}>
+    <a class="skip-link" href="#tool">
+      {c.skip}
+    </a>
+    <div class="app-shell" data-site-shell>
+      <header class="site-header" data-site-header>
+        <a
+          class="brand"
+          data-brand-logo
+          href="https://vinasig.io.vn/"
+          aria-label={c.home}
+        >
+          <picture>
+            <source
+              media="(prefers-color-scheme: dark)"
+              srcset="/brand/reversed.svg"
+            />
+            <script is:inline>
+              document.currentScript?.previousElementSibling?.setAttribute(
+                'media',
+                document.documentElement.dataset.theme === 'dark'
+                  ? 'all'
+                  : 'not all',
+              );
+            </script>
+            <img
+              src="/brand/primary-color.svg"
+              alt="VINASIG"
+              width="540"
+              height="140"
+            />
+          </picture>
+        </a>
+        <SitePreferences lang={lang} alternate={lang === 'vi' ? '/en/' : '/'} />
+      </header>
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <h1 id="page-title">{title}</h1>
+          <p class="lead">
+            {mode === 'cleaner' ? c.cleanerLead : c.readerLead}
+          </p>
+          <p>{description}</p>
+        </section>
+        <div id="tool" class="workspace">
+          <section class="editor" aria-labelledby="input-title">
+            <h2 id="input-title">{c.inputTitle}</h2>
+            <div id="dropzone" class="dropzone">
+              <label class="file-trigger">
+                <Upload size={20} aria-hidden="true" />
+                {c.choose}
+                <input
+                  id="file"
+                  type="file"
+                  aria-describedby="file-help"
+                  disabled
+                />
+              </label>
+              <p id="file-help" class="supporting">
+                {c.drop} {mode === 'cleaner' ? c.cleanerTypes : c.readerTypes}
+              </p>
+            </div>
+            <p class="supporting privacy">{c.privacy}</p>
+            <p id="status" class="status" role="status" aria-live="polite">
+              {c.statusEmpty}
+            </p>
+            <noscript>
+              <p>{c.noScript}</p>
+            </noscript>
+            <div class="form-actions">
+              <button type="button" id="clear" class="clear-button" disabled>
+                <Trash size={18} aria-hidden="true" />
+                {c.clear}
+              </button>
+            </div>
+            <section id="file-info" class="result-section" hidden>
+              <h3>{c.browserInfo}</h3>
+              <p class="supporting">{c.browserInfoHint}</p>
+              <dl id="file-facts" class="facts" data-user-content></dl>
+            </section>
+            {mode === 'cleaner' && (
+              <section id="selection" class="result-section" hidden>
+                <h3>{c.selection}</h3>
+                <p class="supporting">{c.selectionHint}</p>
+                <div class="form-actions">
+                  <button id="all" type="button" class="quiet">
+                    {c.all}
+                  </button>
+                  <button id="none" type="button" class="quiet">
+                    {c.none}
+                  </button>
+                </div>
+                <p id="no-blocks" class="supporting" hidden>
+                  {c.noBlocks}
+                </p>
+                <fieldset id="choices">
+                  <legend class="sr-only">{c.selection}</legend>
+                </fieldset>
+                <button id="process" class="primary" type="button" disabled>
+                  {c.remove}
+                </button>
+              </section>
+            )}
+          </section>
+          <section class="preview" aria-labelledby="result-title">
+            <h2 id="result-title">
+              {mode === 'cleaner' ? c.outputTitle : c.metadataTitle}
+            </h2>
+            <p id="empty-result" class="empty-result">
+              <FileSearch size={32} aria-hidden="true" />
+              {c.statusEmpty}
+            </p>
+            <div id="result" hidden>
+              {mode === 'cleaner' && (
+                <div id="clean-result" hidden>
+                  <dl id="sizes" class="facts"></dl>
+                  <label for="filename">{c.filename}</label>
+                  <input
+                    type="text"
+                    id="filename"
+                    maxlength="120"
+                    aria-describedby="name-help"
+                    autocomplete="off"
+                    spellcheck="false"
+                  />
+                  <p id="name-help" class="supporting">
+                    {c.filenameHint}
+                  </p>
+                  <div class="form-actions">
+                    <button
+                      id="download"
+                      class="primary"
+                      type="button"
+                      disabled
+                    >
+                      <Download size={18} aria-hidden="true" />
+                      {c.download}
+                    </button>
+                  </div>
+                  <img
+                    id="image-preview"
+                    src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                    alt={c.preview}
+                    hidden
+                  />
+                  <p id="preview-unavailable" class="supporting" hidden>
+                    {c.previewUnavailable}
+                  </p>
+                  <p id="kept-choice" class="supporting"></p>
+                  <details id="verification">
+                    <summary>{c.details}</summary>
+                    <p>{c.same}</p>
+                    <h3>{c.hash}</h3>
+                    <dl id="hashes" class="facts" data-user-content></dl>
+                  </details>
+                </div>
+              )}
+              <section id="protected" class="result-section" hidden>
+                <h3>{c.locked}</h3>
+                <p class="supporting">{c.lockedHint}</p>
+                <dl id="protected-list" class="facts" data-user-content></dl>
+              </section>
+              <details id="metadata-details" open>
+                <summary>{c.metadataTitle}</summary>
+                <label for="search">{c.search}</label>
+                <input type="search" id="search" autocomplete="off" />
+                <p id="field-count" class="supporting" aria-live="polite"></p>
+                <dl
+                  id="metadata-fields"
+                  class="facts metadata-fields"
+                  data-user-content
+                ></dl>
+              </details>
+              <section class="result-section">
+                <h3>{c.coverage}</h3>
+                <p id="coverage" data-user-content></p>
+                <h3>{c.warning}</h3>
+                <p id="limits">{c.faqReaderText}</p>
+              </section>
+              <div class="form-actions">
+                <button id="report" type="button" class="clear-button">
+                  {c.downloadReport}
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+        <section class="notes" aria-labelledby="notes-title">
+          <h2 id="notes-title">{c.notes}</h2>
+          {mode === 'cleaner' && (
+            <>
+              <details>
+                <summary>{c.faqWhy}</summary>
+                <p>{c.faqWhyText}</p>
+              </details>
+              <details>
+                <summary>{c.faqPreserve}</summary>
+                <p>{c.faqPreserveText}</p>
+              </details>
+              <details>
+                <summary>{c.faqSafety}</summary>
+                <p>{c.faqSafetyText}</p>
+              </details>
+            </>
+          )}
+          <details>
+            <summary>{c.faqReader}</summary>
+            <p>{c.faqReaderText}</p>
+          </details>
+          <nav
+            class="tool-choice"
+            aria-label={lang === 'vi' ? 'Công cụ liên quan' : 'Related tool'}
+          >
+            <a href={companion + (lang === 'en' ? 'en/' : '')}>
+              {mode === 'cleaner' ? c.companionReader : c.companionCleaner}
+            </a>
+          </nav>
+        </section>
+      </main>
+      <SiteFooter
+        lang={lang}
+        source={source}
+        issues={`${repository}/issues`}
+        licenses="/licenses/NOTICE.txt"
+      />
+    </div>
+    <script>
+      import '../scripts/tool.ts';
+    </script>
+  </body>
+</html>

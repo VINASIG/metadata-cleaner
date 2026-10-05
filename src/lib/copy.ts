@@ -1,0 +1,225 @@
+export const copy = {
+  vi: {
+    cleanerTitle: 'Xóa metadata ảnh',
+    readerTitle: 'Đọc metadata file',
+    cleanerDescription:
+      'Xóa thông tin riêng tư trong ảnh và giảm dung lượng ngay trên thiết bị. Giữ nguyên dữ liệu ảnh đã nén, không mã hóa lại.',
+    readerDescription:
+      'Xem thông tin được nhúng trong ảnh, PDF, âm thanh và tài liệu Office. File chỉ được đọc ngay trong trình duyệt.',
+    cleanerLead: 'Bỏ thông tin thừa. Giữ nguyên ảnh.',
+    readerLead: 'Xem file đang tiết lộ điều gì.',
+    skip: 'Đến công cụ',
+    home: 'Trang chủ VINASIG',
+    choose: 'Chọn file',
+    drop: 'Kéo thả một file vào đây hoặc dán ảnh bằng Ctrl+V.',
+    cleanerTypes: 'JPEG, PNG, WebP và GIF. Tối đa 100 MiB mỗi file.',
+    readerTypes:
+      'Ảnh, PDF, MP3, MP4, FLAC, WAV, Ogg, ZIP và tài liệu Office. Tối đa 100 MiB mỗi file.',
+    privacy:
+      'File và kết quả nằm trong phiên này. Không tải lên máy chủ. Tải lại trang sẽ xóa dữ liệu phiên.',
+    statusEmpty: 'Chọn file để bắt đầu.',
+    loading: 'Đang đọc file.',
+    working: 'Đang xóa các khối đã chọn.',
+    ready: 'Đã đọc file. Mọi khối có thể xóa đều được chọn sẵn.',
+    readerReady:
+      'Đã đọc những thông tin được hỗ trợ. Phạm vi đọc được ghi bên dưới.',
+    done: 'Đã tạo ảnh mới và kiểm tra dữ liệu ảnh nén không đổi.',
+    clear: 'Xóa file và kết quả',
+    inputTitle: 'File gốc',
+    outputTitle: 'Ảnh đã xử lý',
+    metadataTitle: 'Thông tin được đọc',
+    selection: 'Chọn thông tin muốn xóa',
+    selectionHint:
+      'Mỗi lựa chọn xóa cả khối. Một khối EXIF có thể chứa đồng thời GPS, camera, số sê-ri và ảnh thu nhỏ.',
+    all: 'Chọn tất cả',
+    none: 'Bỏ chọn tất cả',
+    remove: 'Xóa metadata đã chọn',
+    download: 'Tải ảnh đã xử lý',
+    downloadReport: 'Tải báo cáo JSON',
+    original: 'Dung lượng gốc',
+    cleaned: 'Dung lượng mới',
+    saved: 'Đã giảm',
+    filename: 'Tên file tải về',
+    filenameHint:
+      'Tên mặc định không dùng tên file gốc. Bạn có thể đặt một tên mới.',
+    noBlocks:
+      'Không có khối metadata có thể xóa trong phạm vi công cụ. Dung lượng có thể giữ nguyên.',
+    locked: 'Phần giữ lại để hiển thị đúng',
+    lockedHint:
+      'Cấu trúc giải mã, màu sắc, hướng xoay, độ trong suốt và thông tin chuyển động được giữ khi cần. Dữ liệu màu có thể còn chứa mô tả thiết bị hoặc tên hồ sơ.',
+    choiceKept: 'Bạn đã chọn giữ',
+    minimal: 'Tạo lại phần tối thiểu cần cho hiển thị',
+    removeBlock: 'Xóa khối',
+    reason: {
+      pixels: 'Dữ liệu ảnh nén',
+      structure: 'Cấu trúc giải mã',
+      color: 'Màu sắc',
+      animation: 'Chuyển động và độ trong suốt',
+      display: 'Cách hiển thị',
+      metadata: 'Metadata có thể xóa',
+    },
+    details: 'Thông tin kỹ thuật và kiểm tra',
+    hash: 'SHA-256 của dữ liệu ảnh nén',
+    same: 'Giống nhau từng byte',
+    originalHash: 'Trước khi xử lý',
+    outputHash: 'Sau khi xử lý',
+    preview: 'Xem trước ảnh đã xử lý',
+    previewUnavailable:
+      'Không hiện xem trước vì ảnh quá lớn hoặc trình duyệt chưa hỗ trợ. Việc giữ nguyên dữ liệu ảnh nén được kiểm tra riêng.',
+    search: 'Tìm trong thông tin',
+    fields: 'trường',
+    blocks: 'khối',
+    count: 'Số khối đã chọn',
+    browserInfo: 'Thông tin trình duyệt cung cấp',
+    browserInfoHint:
+      'Tên file, dung lượng, loại MIME và thời gian sửa dưới đây do trình duyệt cung cấp. Chúng không nhất thiết được nhúng trong file.',
+    fileName: 'Tên file',
+    fileSize: 'Dung lượng',
+    fileType: 'Loại MIME được khai báo',
+    modified: 'Thời gian sửa do trình duyệt cung cấp',
+    format: 'Định dạng được nhận diện',
+    coverage: 'Phạm vi đọc',
+    warning: 'Giới hạn cần biết',
+    notes: 'Cách dùng và giới hạn',
+    faqWhy: 'Dung lượng có thể giảm bao nhiêu?',
+    faqWhyText:
+      'Chỉ các byte metadata và dữ liệu thừa được bỏ. Ảnh có nhiều EXIF, ảnh thu nhỏ hoặc lịch sử chỉnh sửa có thể nhỏ đi đáng kể. Ảnh vốn ít metadata có thể không giảm. Công cụ không nén lại ảnh để đạt một tỷ lệ dung lượng.',
+    faqSafety: 'Ảnh có hết mọi dấu vết nhận diện không?',
+    faqSafetyText:
+      'Không thể đảm bảo điều đó chỉ bằng xóa metadata. Khuôn mặt, biển số, chữ, địa điểm, watermark, dữ liệu giấu trong pixel và dấu vết cảm biến có thể vẫn nằm trong chính ảnh. File tải về cũng có tên và thời gian mới trên thiết bị. Hồ sơ màu cần giữ có thể chứa mô tả. Báo cáo cho biết những phần công cụ giữ lại.',
+    faqPreserve: 'Vì sao còn hướng xoay và hồ sơ màu?',
+    faqPreserveText:
+      'Bỏ hướng xoay có thể làm ảnh nghiêng. Bỏ hồ sơ màu có thể đổi màu. Công cụ tạo lại EXIF tối thiểu khi có thông tin hiển thị cần giữ, bỏ các thông tin cá nhân trong EXIF gốc. Hồ sơ màu, dữ liệu ảnh, độ trong suốt và chuyển động được giữ nguyên. Ảnh HDR, ảnh đa trang hoặc cấu trúc chưa hỗ trợ được từ chối để tránh mất nội dung.',
+    faqReader: 'Công cụ đọc có tìm được mọi thông tin không?',
+    faqReaderText:
+      'Phạm vi phụ thuộc định dạng và thư viện. Thẻ riêng của nhà sản xuất, file mã hóa, lịch sử PDF cũ, dữ liệu nằm trong nội dung hoặc dữ liệu ẩn có thể chưa được đọc. Không tìm thấy một trường không chứng minh file không có thông tin đó. Nội dung được hiển thị như văn bản và không được thực thi.',
+    companionCleaner: 'Mở công cụ xóa metadata ảnh',
+    companionReader: 'Mở công cụ đọc metadata file',
+    noScript: 'Bật JavaScript để xử lý file ngay trên thiết bị.',
+    errors: {
+      unsupported:
+        'Định dạng này chưa được hỗ trợ để xóa an toàn. Hãy dùng công cụ đọc metadata để xem thông tin.',
+      invalid:
+        'File bị hỏng, không đúng định dạng hoặc có cấu trúc chưa thể xác minh. Không tạo ảnh mới.',
+      large: 'File vượt giới hạn 100 MiB. Hãy chọn file nhỏ hơn.',
+      unsafe:
+        'Ảnh có cấu trúc nâng cao chưa được hỗ trợ an toàn, như nhiều ảnh hoặc HDR. Không tạo ảnh mới.',
+      timeout: 'Quá thời gian xử lý. Hãy thử file nhỏ hơn.',
+      failed: 'Không đọc được file này trong phạm vi hỗ trợ.',
+      multiple: 'Chọn hoặc thả một file mỗi lần.',
+      name: 'Nhập tên file không có ký tự đường dẫn và giữ đúng phần mở rộng.',
+    },
+  },
+  en: {
+    cleanerTitle: 'Remove image metadata',
+    readerTitle: 'Read file metadata',
+    cleanerDescription:
+      'Remove private image metadata and reduce file size on your device. Preserve the original compressed image data without re-encoding.',
+    readerDescription:
+      'Inspect metadata embedded in images, PDFs, audio and Office documents. Files are read locally in your browser.',
+    cleanerLead: 'Remove extra information. Keep the image.',
+    readerLead: 'See what your file reveals.',
+    skip: 'Skip to the tool',
+    home: 'VINASIG home',
+    choose: 'Choose a file',
+    drop: 'Drop one file here or paste an image with Ctrl+V.',
+    cleanerTypes: 'JPEG, PNG, WebP and GIF. Up to 100 MiB per file.',
+    readerTypes:
+      'Images, PDF, MP3, MP4, FLAC, WAV, Ogg, ZIP and Office documents. Up to 100 MiB per file.',
+    privacy:
+      'Files and results stay in this session. Nothing is uploaded. Reloading clears session data.',
+    statusEmpty: 'Choose a file to begin.',
+    loading: 'Reading the file.',
+    working: 'Removing the selected blocks.',
+    ready: 'File inspected. All removable blocks are selected.',
+    readerReady:
+      'Supported information has been read. The inspection scope appears below.',
+    done: 'New image created. Compressed image data is unchanged.',
+    clear: 'Clear file and results',
+    inputTitle: 'Original file',
+    outputTitle: 'Processed image',
+    metadataTitle: 'Detected information',
+    selection: 'Choose what to remove',
+    selectionHint:
+      'Each choice removes a complete block. One EXIF block may contain location, camera details, serial numbers and a thumbnail.',
+    all: 'Select all',
+    none: 'Deselect all',
+    remove: 'Remove selected metadata',
+    download: 'Download processed image',
+    downloadReport: 'Download JSON report',
+    original: 'Original size',
+    cleaned: 'New size',
+    saved: 'Saved',
+    filename: 'Download file name',
+    filenameHint:
+      'The default does not use the original file name. You can enter a new name.',
+    noBlocks:
+      'No removable blocks were found within this tool’s supported scope. File size may stay the same.',
+    locked: 'Kept for correct display',
+    lockedHint:
+      'Decoder structure, colors, orientation, transparency and animation are kept when needed. Color data may still include device descriptions or profile names.',
+    choiceKept: 'You chose to keep',
+    minimal: 'Rebuilt with only required display information',
+    removeBlock: 'Remove block',
+    reason: {
+      pixels: 'Compressed image data',
+      structure: 'Decoder structure',
+      color: 'Colors',
+      animation: 'Animation and transparency',
+      display: 'Display information',
+      metadata: 'Removable metadata',
+    },
+    details: 'Technical details and verification',
+    hash: 'SHA-256 of compressed image data',
+    same: 'Identical byte for byte',
+    originalHash: 'Before processing',
+    outputHash: 'After processing',
+    preview: 'Processed image preview',
+    previewUnavailable:
+      'Preview is unavailable for this image size or browser. Compressed image preservation is checked separately.',
+    search: 'Search information',
+    fields: 'fields',
+    blocks: 'blocks',
+    count: 'Selected blocks',
+    browserInfo: 'Information supplied by the browser',
+    browserInfoHint:
+      'The browser supplies the file name, size, MIME type and modification time below. These values are not necessarily embedded in the file.',
+    fileName: 'File name',
+    fileSize: 'File size',
+    fileType: 'Declared MIME type',
+    modified: 'Browser file modification time',
+    format: 'Detected format',
+    coverage: 'Inspection scope',
+    warning: 'Inspection limits',
+    notes: 'Usage and limits',
+    faqWhy: 'How much smaller can the file become?',
+    faqWhyText:
+      'Only metadata bytes and extra data are removed. Large EXIF blocks, thumbnails or editing history can make a noticeable difference. Files with little metadata may stay the same size. The tool does not re-compress images to reach a target size.',
+    faqSafety: 'Does this remove every identifying trace?',
+    faqSafetyText:
+      'Metadata removal cannot guarantee this. Faces, number plates, text, places, watermarks, hidden pixel data and sensor fingerprints may remain in the image itself. Downloaded files also get a name and timestamps on your device. Required color profiles may contain descriptions. The report lists what is kept.',
+    faqPreserve: 'Why keep orientation and color profiles?',
+    faqPreserveText:
+      'Removing orientation can turn an image sideways. Removing a color profile can change its colors. When needed, the tool rebuilds minimal display EXIF and removes personal information from the original EXIF. Color profiles, image data, transparency and animation are preserved. Unsupported HDR, multiple-image or advanced structures are rejected to avoid losing content.',
+    faqReader: 'Can the reader find every piece of information?',
+    faqReaderText:
+      'Coverage depends on the format and parser. Private manufacturer tags, encrypted files, old PDF revisions, information in the content and hidden data may not be read. A missing field does not prove that the file lacks that information. Values are displayed as text and never executed.',
+    companionCleaner: 'Open the image metadata cleaner',
+    companionReader: 'Open the file metadata reader',
+    noScript: 'Enable JavaScript to process files on your device.',
+    errors: {
+      unsupported:
+        'This format is not supported for safe removal. Use the metadata reader to inspect it.',
+      invalid:
+        'The file is damaged, malformed or cannot be verified. No new image was created.',
+      large: 'The file exceeds the 100 MiB limit. Choose a smaller file.',
+      unsafe:
+        'This image has an unsupported advanced structure such as multiple images or HDR. No new image was created.',
+      timeout: 'Processing timed out. Try a smaller file.',
+      failed: 'This file could not be read within the supported scope.',
+      multiple: 'Choose or drop one file at a time.',
+      name: 'Enter a file name without path characters and keep the correct extension.',
+    },
+  },
+} as const;
+export type Language = keyof typeof copy;
