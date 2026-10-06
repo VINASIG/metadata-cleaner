@@ -1,6 +1,6 @@
 # Verification record, 6 October 2026
 
-Implementation and static builds pass locally. The owner authorized public repository creation, Repo details writes, push, CI, Pages, DNS, Search Console and public catalog/profile synchronization on 6 October 2026. These publication steps are in progress. Live availability is reported only after observing deployment and HTTPS.
+Implementation and static builds pass locally and in the first public CI deployment. The owner authorized public repository creation, Repo details writes, push, CI, Pages, DNS, Search Console and public catalog/profile synchronization on 6 October 2026. The canonical website is live with an approved certificate and enforced HTTPS. Exact source revisions, CI links and live observations are recorded in [PUBLICATION.md](PUBLICATION.md).
 
 Source validation passes Astro strict checks with zero errors, warnings and hints, typed strict ESLint, CSS lint, format, managed standards integrity and license checks. Builds pass generated HTML, canonical/hreflang, JSON-LD, sitemap, hash-based CSP, shared chrome digest and unchanged brand/font asset digests. Production npm audit reports zero advisories. See DEPENDENCIES.md for build-only advisories.
 
@@ -14,4 +14,4 @@ Lighthouse uses three cold-navigation runs per mobile/desktop profile and locale
 
 Standards integration uses the reviewed content snapshot recorded in .vinasig/provenance.json. Managed file hashes and manifests pass. Actual Codex automatic skill discovery is NOT_RUN and is not inferred from Markdown paths. The source change to agent-standards passes its check, 20 installer tests and build and adds immediate Repo details setup/readback for every profile.
 
-Public host and sitemap checks remain NOT_RUN until publication. The precise proposals are in DOMAIN.md. No private dashboard captures, credentials, original user files or machine memory are part of the published source.
+Public host, locale metadata, worker/download integration, robots and parsed sitemap checks pass for the first deployment. Google live inspection fetched the sitemap successfully, and the sitemap report shows Success with two discovered pages. Production indexing remains NOT_RUN. Domain bindings are in DOMAIN.md. No private dashboard captures, credentials, original user files or machine memory are part of the published source.
