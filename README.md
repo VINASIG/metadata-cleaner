@@ -1,6 +1,6 @@
 # VINASIG Metadata Cleaner
 
-Remove optional metadata from JPEG, PNG, WebP and GIF in the browser without re-encoding image data. Choose complete metadata blocks, preserve required display information and see the exact number of bytes removed. The original file is never overwritten or uploaded. Supported compressed image payloads are compared byte for byte before offering a download.
+Remove optional metadata from JPEG, PNG, WebP and GIF in the browser without re-encoding image data. Choose complete metadata blocks, preserve required display information and see the exact number of bytes removed. Compare grouped metadata from the original and processed image, including supported C2PA origin claims. The original file is never overwritten or uploaded. Supported compressed image payloads are compared byte for byte before offering a download.
 
 Use [Metadata Cleaner](https://clean.vinasig.io.vn/) in Vietnamese or [English](https://clean.vinasig.io.vn/en/). Both routes are live over enforced HTTPS. The separate [Metadata Reader](https://metadata.vinasig.io.vn/) inspects additional file formats. Observed deployment, DNS, repository details and discovery evidence are recorded in the [publication audit](docs/audits/PUBLICATION.md).
 

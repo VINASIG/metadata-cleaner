@@ -3,6 +3,12 @@ import { mode } from '../lib/site.ts';
 import { MAX_FILE_BYTES } from '../lib/container.ts';
 import type { Response, Request, Summary } from '../lib/messages.ts';
 import type { Entry, Metadata } from '../lib/metadata.ts';
+import {
+  originFacts,
+  recordedActions,
+  summarizeBlocks,
+} from '../lib/presentation.ts';
+import { createMetadataView } from './metadata-view.ts';
 
 const lang = document.documentElement.lang === 'en' ? 'en' : 'vi';
 const c = copy[lang];
@@ -32,6 +38,11 @@ let revision = 0;
 let timeout: ReturnType<typeof setTimeout> | null = null;
 let previewUrl: string | null = null;
 let reportData: Response | null = null;
+let sourceMetadata: Metadata | null = null;
+let sourceResponse: Response | null = null;
+let processedMetadata: Metadata | null = null;
+let sourcePreviewUrl: string | null = null;
+const metadataView = createMetadataView(lang);
 function show(selector: string, value: boolean): void {
   const node = document.querySelector<HTMLElement>(selector);
   if (node) node.hidden = !value;
@@ -62,9 +73,13 @@ function stop(): void {
 }
 function clearOutput(): void {
   output = null;
-  reportData = null;
+  reportData = sourceResponse;
   if (download) download.disabled = true;
   show('#clean-result', false);
+  processedMetadata = null;
+  const processedView =
+    document.querySelector<HTMLButtonElement>('#view-processed');
+  if (processedView) processedView.disabled = true;
   if (previewUrl) URL.revokeObjectURL(previewUrl);
   previewUrl = null;
   const image = document.querySelector<HTMLImageElement>('#image-preview');
@@ -80,6 +95,16 @@ function reset(): void {
   file = null;
   summary = null;
   metadata = null;
+  sourceMetadata = null;
+  sourceResponse = null;
+  reportData = null;
+  if (sourcePreviewUrl) URL.revokeObjectURL(sourcePreviewUrl);
+  sourcePreviewUrl = null;
+  const sourceImage = element('#source-preview', HTMLImageElement);
+  sourceImage.onload = null;
+  sourceImage.onerror = null;
+  sourceImage.removeAttribute('src');
+  sourceImage.hidden = true;
   fileInput.value = '';
   search.value = '';
   clear.disabled = true;
@@ -88,13 +113,30 @@ function reset(): void {
   show('#result', false);
   show('#empty-result', true);
   show('#protected', false);
-  element('#metadata-fields').replaceChildren();
+  show('#metadata-views', false);
+  show('#current-view', false);
+  show('#source-figure', false);
+  show('#origin', false);
+  show('#history', false);
+  metadataView.reset();
   setStatus(c.statusEmpty);
 }
 function selected(): string[] {
   return [
     ...document.querySelectorAll<HTMLInputElement>('#choices input:checked'),
   ].map((input) => input.value);
+}
+function updateSavings(): void {
+  if (!summary) return;
+  const ids = new Set(selected());
+  const saved = summary.blocks
+    .filter((block) => ids.has(block.id))
+    .reduce(
+      (total, block) => total + block.length - (block.replacement?.length ?? 0),
+      0,
+    );
+  const node = document.querySelector('#potential-savings');
+  if (node) node.textContent = c.potential + ' - ' + size(saved);
 }
 function renderChoices(value: Summary): void {
   if (mode !== 'cleaner') return;
@@ -114,51 +156,68 @@ function renderChoices(value: Summary): void {
     input.setAttribute('aria-label', `${c.removeBlock} ${b.name}`);
     const span = document.createElement('span');
     span.dataset['userContent'] = '';
-    span.textContent = b.name;
+    span.textContent =
+      b.name === 'caBX'
+        ? c.contentCredentialsBlock
+        : ['iTXt', 'tEXt', 'zTXt'].includes(b.name)
+          ? c.textBlock + ' - ' + b.name
+          : ['EXIF', 'eXIf'].includes(b.name)
+            ? c.exifBlock
+            : b.name;
     const note = document.createElement('small');
     note.textContent = `${size(b.length)}${b.replacement ? ' - ' + c.minimal : ''}`;
     span.append(note);
+    if (b.name === 'caBX') {
+      const hint = document.createElement('small');
+      hint.textContent = c.contentCredentialsRemoval;
+      span.append(hint);
+    }
     label.append(input, span);
     choices.append(label);
     input.addEventListener('change', () => {
       revision++;
       stop();
       clearOutput();
+      if (sourceMetadata) renderMetadata(sourceMetadata);
+      updateSavings();
       if (processButton) processButton.disabled = false;
     });
   }
   show('#selection', true);
   if (processButton) processButton.disabled = false;
+  updateSavings();
 }
 function renderProtected(value: Summary): void {
   facts(
     '#protected-list',
-    value.blocks
-      .filter((b) => b.reason !== 'metadata')
-      .map((b) => ({
-        key: b.name,
-        value: `${c.reason[b.reason]} - ${size(b.length)}`,
-      })),
+    summarizeBlocks(
+      value.blocks.filter((b) => mode === 'reader' || b.reason !== 'metadata'),
+    ).map((b) => ({
+      key: b.name + (b.count > 1 ? ` × ${String(b.count)}` : ''),
+      value: `${c.reason[b.reason as keyof typeof c.reason]} - ${size(b.bytes)}`,
+    })),
   );
   show('#protected', true);
 }
-function renderFields(): void {
-  if (!metadata) return;
-  const needle = search.value.toLocaleLowerCase(lang);
-  const fields = metadata.fields.filter((entry) =>
-    (entry.key + ' ' + entry.value).toLocaleLowerCase(lang).includes(needle),
-  );
-  facts('#metadata-fields', fields);
-  element('#field-count').textContent = `${String(fields.length)} ${c.fields}`;
-}
 function renderMetadata(value: Metadata): void {
   metadata = value;
-  renderFields();
+  metadataView.render(value.fields);
+  if (mode === 'cleaner') {
+    show('#metadata-views', true);
+    show('#current-view', true);
+    const processed = value === processedMetadata;
+    element('#view-original').setAttribute('aria-pressed', String(!processed));
+    element('#view-processed').setAttribute('aria-pressed', String(processed));
+    element('#current-view').textContent =
+      c.currentView +
+      ' - ' +
+      (processed ? c.processedMetadata : c.originalMetadata);
+  }
   const scopes =
     lang === 'vi'
       ? {
           image:
-            'Các trường ảnh do ExifReader hỗ trợ. EXIF, IPTC, XMP, ICC và cấu trúc ảnh tùy định dạng.',
+            'Các trường EXIF, IPTC, XMP, ICC và cấu trúc ảnh được hỗ trợ. Đọc bản khai báo C2PA từ JUMBF, CBOR và JSON trong các khối PNG, JPEG hoặc WebP được hỗ trợ. Chữ ký chưa được xác minh.',
           pdf: 'Thông tin tài liệu PDF hiện tại và XMP. Không kiểm tra tất cả phiên bản lịch sử.',
           audio: 'Thông tin codec và thẻ âm thanh do music-metadata hỗ trợ.',
           archive:
@@ -168,7 +227,7 @@ function renderMetadata(value: Metadata): void {
         }
       : {
           image:
-            'Image tags supported by ExifReader. EXIF, IPTC, XMP, ICC and image structure depend on the format.',
+            'Supported EXIF, IPTC, XMP, ICC and image structure. C2PA claims are read from JUMBF, CBOR and JSON in supported PNG, JPEG or WebP blocks. Signatures are not verified.',
           pdf: 'Current PDF document properties and XMP. Historical revisions are not fully inspected.',
           audio: 'Codec details and media tags supported by music-metadata.',
           archive:
@@ -184,8 +243,116 @@ function renderMetadata(value: Metadata): void {
         ? ' Một số dữ liệu chưa được đọc đầy đủ.'
         : ' Some data could not be fully read.'
       : '');
+  show('#parser-warnings', value.warnings.length > 0);
+  const warningNames: Record<string, string> =
+    lang === 'vi'
+      ? {
+          'image-parse': 'Một số thẻ ảnh chưa được giải mã.',
+          'jumbf-parse': 'Một khối JUMBF chưa được giải mã đầy đủ.',
+          'jumbf-compressed': 'Khối JUMBF nén chưa được giải mã.',
+          'cbor-parse': 'Một khối CBOR chưa được giải mã đầy đủ.',
+          'c2pa-json': 'Một khối JSON trong bản khai báo chưa được giải mã.',
+          'c2pa-container': 'Khối nguồn gốc bị hỏng hoặc vượt giới hạn đọc.',
+          'certificate-parse': 'Một chứng thư chưa được giải mã đầy đủ.',
+          'field-limit': 'Một số trường hoặc giá trị dài đã chạm giới hạn đọc.',
+          unsupported: 'Định dạng này chỉ được kiểm tra thông tin cơ bản.',
+        }
+      : {
+          'image-parse': 'Some image tags could not be decoded.',
+          'jumbf-parse': 'A JUMBF block could not be fully decoded.',
+          'jumbf-compressed': 'A compressed JUMBF block is not decoded.',
+          'cbor-parse': 'A CBOR block could not be fully decoded.',
+          'c2pa-json': 'A JSON block in a claim could not be decoded.',
+          'c2pa-container':
+            'An origin block is malformed or exceeds the inspection limit.',
+          'certificate-parse': 'A certificate could not be fully decoded.',
+          'field-limit':
+            'Some fields or long values reached the inspection limit.',
+          unsupported: 'Only basic information is inspected for this format.',
+        };
+  element('#parser-warnings').textContent = value.warnings
+    .map((warning) => warningNames[warning] ?? warning)
+    .join(' ');
   result.hidden = false;
   show('#empty-result', false);
+}
+function renderOverview(value: Metadata): void {
+  if (!file) return;
+  element('#file-format').textContent = value.format;
+  element('#file-tags').textContent =
+    `${String(value.fields.length)} ${c.fields}`;
+  show('#dimension-fact', !!(value.width && value.height));
+  element('#file-dimensions').textContent =
+    value.width && value.height
+      ? `${String(value.width)} × ${String(value.height)}`
+      : '';
+  const origins = originFacts(value.fields, lang);
+  facts('#origin-facts', origins);
+  show('#origin', true);
+  show('#origin-empty', origins.length === 0);
+  show(
+    '#credentials-note',
+    value.fields.some((field) => field.group === 'C2PA'),
+  );
+  const actions = recordedActions(value.fields);
+  const list = element('#recorded-actions');
+  list.replaceChildren();
+  const actionNames: Record<string, string> =
+    lang === 'vi'
+      ? {
+          'c2pa.created': 'Tạo ảnh',
+          'c2pa.converted': 'Chuyển định dạng',
+          'c2pa.edited': 'Chỉnh sửa ảnh',
+          'c2pa.watermarked.unbound': 'Thêm watermark',
+        }
+      : {
+          'c2pa.created': 'Created image',
+          'c2pa.converted': 'Converted format',
+          'c2pa.edited': 'Edited image',
+          'c2pa.watermarked.unbound': 'Added watermark',
+        };
+  for (const action of actions) {
+    const item = document.createElement('li');
+    const title = document.createElement('strong');
+    title.textContent = actionNames[action.action] ?? action.action;
+    const content = document.createElement('p');
+    content.textContent = [action.when, action.software, action.description]
+      .filter(Boolean)
+      .join(' - ');
+    const context = document.createElement('code');
+    context.textContent = action.key;
+    item.append(title, content, context);
+    list.append(item);
+  }
+  show('#history', actions.length > 0);
+  if (sourcePreviewUrl) URL.revokeObjectURL(sourcePreviewUrl);
+  sourcePreviewUrl = null;
+  const image = element('#source-preview', HTMLImageElement);
+  if (
+    value.width &&
+    value.height &&
+    value.width * value.height <= 40000000 &&
+    value.mime &&
+    /^(image\/(jpeg|png|webp|gif|avif))$/.test(value.mime)
+  ) {
+    const current = revision;
+    sourcePreviewUrl = URL.createObjectURL(
+      new Blob([file], { type: value.mime }),
+    );
+    image.onload = () => {
+      if (current === revision) {
+        image.hidden = false;
+        show('#source-figure', true);
+      }
+    };
+    image.onerror = () => {
+      if (current === revision) {
+        image.hidden = true;
+        show('#source-figure', false);
+      }
+    };
+    image.src = sourcePreviewUrl;
+  }
 }
 function extension(value: Summary): string {
   return { JPEG: 'jpg', PNG: 'png', WebP: 'webp', GIF: 'gif' }[value.format];
@@ -249,9 +416,12 @@ async function run(operation: 'inspect' | 'clean'): Promise<void> {
         if (processButton) processButton.disabled = false;
         return;
       }
-      renderMetadata(response.metadata);
       reportData = response;
       if (operation === 'inspect') {
+        sourceMetadata = response.metadata;
+        sourceResponse = response;
+        renderMetadata(sourceMetadata);
+        renderOverview(sourceMetadata);
         summary = response.summary;
         if (mode === 'cleaner' && !summary) {
           show('#result', false);
@@ -265,6 +435,10 @@ async function run(operation: 'inspect' | 'clean'): Promise<void> {
         }
         setStatus(mode === 'cleaner' ? c.ready : c.readerReady);
       } else if (response.output && summary && file) {
+        processedMetadata = response.metadata;
+        renderMetadata(processedMetadata);
+        const processedView = element('#view-processed', HTMLButtonElement);
+        processedView.disabled = false;
         output = response.output;
         show('#clean-result', true);
         if (response.summary) renderProtected(response.summary);
@@ -356,6 +530,10 @@ function choose(files: FileList | File[]): void {
     },
   ]);
   show('#file-info', true);
+  element('#selected-file-name').textContent = file.name;
+  element('#file-size').textContent = size(file.size);
+  element('#file-format').textContent = '';
+  element('#file-tags').textContent = '';
   void run('inspect');
 }
 fileInput.addEventListener('change', () => {
@@ -371,21 +549,61 @@ download?.addEventListener('click', () => {
   if (output && summary && filename && updateName())
     blobDownload(output, filename.value.trim(), summary.mime);
 });
-search.addEventListener('input', renderFields);
+document.querySelector('#view-original')?.addEventListener('click', () => {
+  if (sourceMetadata) renderMetadata(sourceMetadata);
+});
+document.querySelector('#view-processed')?.addEventListener('click', () => {
+  if (processedMetadata) renderMetadata(processedMetadata);
+});
+element('#copy-report', HTMLButtonElement).addEventListener('click', () => {
+  if (!metadata) return;
+  void navigator.clipboard
+    .writeText(
+      metadata.fields.map((field) => `${field.key}\t${field.value}`).join('\n'),
+    )
+    .then(
+      () => {
+        setStatus(c.copied);
+      },
+      () => {
+        setStatus(c.copyFailed, true);
+      },
+    );
+});
 element('#report', HTMLButtonElement).addEventListener('click', () => {
   if (!reportData) return;
+  const displayedReport =
+    mode === 'cleaner' && metadata === sourceMetadata
+      ? sourceResponse
+      : reportData;
   const json = JSON.stringify(
     {
       tool: mode,
+      view:
+        mode === 'cleaner'
+          ? metadata === processedMetadata
+            ? 'processed'
+            : 'original'
+          : 'original',
       scope: metadata?.scope,
       format: metadata?.format,
       fields: metadata?.fields,
       warnings: metadata?.warnings,
-      kept: reportData.ok ? reportData.summary?.blocks : [],
-      removed: reportData.ok ? reportData.removed : [],
-      saved: reportData.ok ? reportData.saved : undefined,
-      beforeHash: reportData.ok ? reportData.beforeHash : undefined,
-      afterHash: reportData.ok ? reportData.afterHash : undefined,
+      ...(mode === 'reader' && file
+        ? {
+            browser: {
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              lastModified: file.lastModified,
+            },
+          }
+        : {}),
+      kept: displayedReport?.ok ? displayedReport.summary?.blocks : [],
+      removed: displayedReport?.ok ? displayedReport.removed : [],
+      saved: displayedReport?.ok ? displayedReport.saved : undefined,
+      beforeHash: displayedReport?.ok ? displayedReport.beforeHash : undefined,
+      afterHash: displayedReport?.ok ? displayedReport.afterHash : undefined,
       limits: c.faqReaderText,
     },
     null,
@@ -404,10 +622,12 @@ for (const [id, checked] of [
       revision++;
       stop();
       clearOutput();
+      if (sourceMetadata) renderMetadata(sourceMetadata);
       for (const input of document.querySelectorAll<HTMLInputElement>(
         '#choices input',
       ))
         input.checked = checked;
+      updateSavings();
       if (processButton) processButton.disabled = false;
     });
 }

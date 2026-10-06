@@ -375,8 +375,8 @@ test('keyboard choices and forced colors preserve native semantics', async ({
   await expect(first).not.toBeChecked();
   await first.press('Space');
   await expect(first).toBeChecked();
-  await page.locator('#metadata-details summary').focus();
-  await page.locator('#metadata-details summary').press('Enter');
+  await page.locator('#metadata-details > summary').focus();
+  await page.locator('#metadata-details > summary').press('Enter');
   await expect(page.locator('#metadata-details')).not.toHaveAttribute(
     'open',
     '',

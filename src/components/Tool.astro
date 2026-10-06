@@ -119,14 +119,13 @@ const schema = {
       <main>
         <section class="intro" aria-labelledby="page-title">
           <h1 id="page-title">{title}</h1>
-          <p class="lead">
-            {mode === 'cleaner' ? c.cleanerLead : c.readerLead}
-          </p>
           <p>{description}</p>
         </section>
         <div id="tool" class="workspace">
           <section class="editor" aria-labelledby="input-title">
-            <h2 id="input-title">{c.inputTitle}</h2>
+            <h2 id="input-title" class="sr-only">
+              {c.inputTitle}
+            </h2>
             <div id="dropzone" class="dropzone">
               <label class="file-trigger">
                 <Upload size={20} aria-hidden="true" />
@@ -142,128 +141,247 @@ const schema = {
                 {c.drop} {mode === 'cleaner' ? c.cleanerTypes : c.readerTypes}
               </p>
             </div>
-            <p class="supporting privacy">{c.privacy}</p>
+            <div class="input-feedback">
+              <p class="supporting privacy">{c.privacy}</p>
+              <button type="button" id="clear" class="clear-button" disabled>
+                <Trash size={18} aria-hidden="true" />
+                {c.clear}
+              </button>
+            </div>
             <p id="status" class="status" role="status" aria-live="polite">
               {c.statusEmpty}
             </p>
             <noscript>
               <p>{c.noScript}</p>
             </noscript>
-            <div class="form-actions">
-              <button type="button" id="clear" class="clear-button" disabled>
-                <Trash size={18} aria-hidden="true" />
-                {c.clear}
-              </button>
-            </div>
-            <section id="file-info" class="result-section" hidden>
-              <h3>{c.browserInfo}</h3>
-              <p class="supporting">{c.browserInfoHint}</p>
-              <dl id="file-facts" class="facts" data-user-content></dl>
-            </section>
-            {mode === 'cleaner' && (
-              <section id="selection" class="result-section" hidden>
-                <h3>{c.selection}</h3>
-                <p class="supporting">{c.selectionHint}</p>
-                <div class="form-actions">
-                  <button id="all" type="button" class="quiet">
-                    {c.all}
-                  </button>
-                  <button id="none" type="button" class="quiet">
-                    {c.none}
-                  </button>
+            <section
+              id="file-info"
+              class="file-info"
+              aria-labelledby="overview-title"
+              hidden
+            >
+              <h2 id="overview-title" class="sr-only">
+                {c.overview}
+              </h2>
+              <div class="file-overview">
+                <figure id="source-figure" hidden>
+                  <img
+                    id="source-preview"
+                    src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                    alt={c.originalPreview}
+                    hidden
+                  />
+                  <figcaption class="supporting">
+                    {c.originalPreview}
+                  </figcaption>
+                </figure>
+                <div class="file-summary">
+                  <h2 id="selected-file-name" data-user-content>
+                    {c.overview}
+                  </h2>
+                  <dl class="summary-facts">
+                    <div>
+                      <dt>{c.format}</dt>
+                      <dd id="file-format" data-user-content></dd>
+                    </div>
+                    <div>
+                      <dt>{c.fileSize}</dt>
+                      <dd id="file-size" data-user-content></dd>
+                    </div>
+                    <div id="dimension-fact" hidden>
+                      <dt>{c.dimensions}</dt>
+                      <dd id="file-dimensions" data-user-content></dd>
+                    </div>
+                    <div>
+                      <dt>{c.metadataTitle}</dt>
+                      <dd id="file-tags"></dd>
+                    </div>
+                  </dl>
+                  <details class="browser-details">
+                    <summary>{c.browserInfo}</summary>
+                    <p class="supporting">{c.browserInfoHint}</p>
+                    <dl id="file-facts" class="facts" data-user-content></dl>
+                  </details>
                 </div>
-                <p id="no-blocks" class="supporting" hidden>
-                  {c.noBlocks}
+              </div>
+              <section
+                id="origin"
+                class="origin"
+                aria-labelledby="origin-title"
+                hidden
+              >
+                <h3 id="origin-title">{c.origin}</h3>
+                <p id="credentials-note" class="credential-note" hidden>
+                  <strong>{c.credentials}</strong> {c.credentialsHint}
                 </p>
-                <fieldset id="choices">
-                  <legend class="sr-only">{c.selection}</legend>
-                </fieldset>
-                <button id="process" class="primary" type="button" disabled>
-                  {c.remove}
-                </button>
+                <dl id="origin-facts" class="facts" data-user-content></dl>
+                <p id="origin-empty" class="supporting" hidden>
+                  {c.originEmpty}
+                </p>
+                <details id="history" hidden>
+                  <summary>{c.history}</summary>
+                  <ol
+                    id="recorded-actions"
+                    class="history-list"
+                    data-user-content
+                  ></ol>
+                </details>
               </section>
-            )}
+            </section>
           </section>
+          {mode === 'cleaner' && (
+            <section
+              id="selection"
+              class="selection"
+              aria-labelledby="selection-title"
+              hidden
+            >
+              <h2 id="selection-title">{c.selection}</h2>
+              <p class="supporting">{c.selectionHint}</p>
+              <div class="form-actions">
+                <button id="all" type="button" class="quiet">
+                  {c.all}
+                </button>
+                <button id="none" type="button" class="quiet">
+                  {c.none}
+                </button>
+              </div>
+              <p id="no-blocks" class="supporting" hidden>
+                {c.noBlocks}
+              </p>
+              <fieldset id="choices">
+                <legend class="sr-only">{c.selection}</legend>
+              </fieldset>
+              <p id="potential-savings" class="supporting"></p>
+              <button id="process" class="primary" type="button" disabled>
+                {c.remove}
+              </button>
+            </section>
+          )}
           <section class="preview" aria-labelledby="result-title">
-            <h2 id="result-title">
+            <h2 id="result-title" class="sr-only">
               {mode === 'cleaner' ? c.outputTitle : c.metadataTitle}
             </h2>
             <p id="empty-result" class="empty-result">
-              <FileSearch size={32} aria-hidden="true" />
+              <FileSearch size={24} aria-hidden="true" />
               {c.statusEmpty}
             </p>
             <div id="result" hidden>
               {mode === 'cleaner' && (
-                <div id="clean-result" hidden>
-                  <dl id="sizes" class="facts"></dl>
-                  <label for="filename">{c.filename}</label>
-                  <input
-                    type="text"
-                    id="filename"
-                    maxlength="120"
-                    aria-describedby="name-help"
-                    autocomplete="off"
-                    spellcheck="false"
-                  />
-                  <p id="name-help" class="supporting">
-                    {c.filenameHint}
-                  </p>
-                  <div class="form-actions">
+                <>
+                  <div id="clean-result" hidden>
+                    <h2>{c.outputTitle}</h2>
+                    <div class="processed-overview">
+                      <div>
+                        <dl id="sizes" class="facts size-facts"></dl>
+                        <label for="filename">{c.filename}</label>
+                        <input
+                          type="text"
+                          id="filename"
+                          maxlength="120"
+                          aria-describedby="name-help"
+                          autocomplete="off"
+                          spellcheck="false"
+                        />
+                        <p id="name-help" class="supporting">
+                          {c.filenameHint}
+                        </p>
+                        <div class="form-actions">
+                          <button
+                            id="download"
+                            class="primary"
+                            type="button"
+                            disabled
+                          >
+                            <Download size={18} aria-hidden="true" />
+                            {c.download}
+                          </button>
+                        </div>
+                        <p id="kept-choice" class="supporting"></p>
+                      </div>
+                      <img
+                        id="image-preview"
+                        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                        alt={c.preview}
+                        hidden
+                      />
+                    </div>
+                    <p id="preview-unavailable" class="supporting" hidden>
+                      {c.previewUnavailable}
+                    </p>
+                    <details id="verification">
+                      <summary>{c.details}</summary>
+                      <p>{c.same}</p>
+                      <h3>{c.hash}</h3>
+                      <dl id="hashes" class="facts" data-user-content></dl>
+                    </details>
+                  </div>
+                  <div id="metadata-views" class="form-actions" hidden>
                     <button
-                      id="download"
-                      class="primary"
+                      id="view-original"
                       type="button"
+                      class="group-button"
+                      aria-pressed="true"
+                    >
+                      {c.originalMetadata}
+                    </button>
+                    <button
+                      id="view-processed"
+                      type="button"
+                      class="group-button"
+                      aria-pressed="false"
                       disabled
                     >
-                      <Download size={18} aria-hidden="true" />
-                      {c.download}
+                      {c.processedMetadata}
                     </button>
                   </div>
-                  <img
-                    id="image-preview"
-                    src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-                    alt={c.preview}
-                    hidden
-                  />
-                  <p id="preview-unavailable" class="supporting" hidden>
-                    {c.previewUnavailable}
-                  </p>
-                  <p id="kept-choice" class="supporting"></p>
-                  <details id="verification">
-                    <summary>{c.details}</summary>
-                    <p>{c.same}</p>
-                    <h3>{c.hash}</h3>
-                    <dl id="hashes" class="facts" data-user-content></dl>
-                  </details>
-                </div>
+                  <p id="current-view" class="supporting" hidden></p>
+                </>
               )}
-              <section id="protected" class="result-section" hidden>
-                <h3>{c.locked}</h3>
-                <p class="supporting">{c.lockedHint}</p>
-                <dl id="protected-list" class="facts" data-user-content></dl>
-              </section>
               <details id="metadata-details" open>
                 <summary>{c.metadataTitle}</summary>
-                <label for="search">{c.search}</label>
-                <input type="search" id="search" autocomplete="off" />
+                <div class="metadata-toolbar">
+                  <div class="search-field">
+                    <label for="search">{c.search}</label>
+                    <input type="search" id="search" autocomplete="off" />
+                  </div>
+                  <div class="form-actions report-actions">
+                    <button id="copy-report" type="button" class="clear-button">
+                      {c.copyReport}
+                    </button>
+                    <button id="report" type="button" class="clear-button">
+                      <Download size={18} aria-hidden="true" />
+                      {c.downloadReport}
+                    </button>
+                  </div>
+                </div>
+                <nav
+                  id="metadata-groups"
+                  class="metadata-groups"
+                  aria-label={c.groups}
+                ></nav>
                 <p id="field-count" class="supporting" aria-live="polite"></p>
-                <dl
-                  id="metadata-fields"
-                  class="facts metadata-fields"
-                  data-user-content
-                ></dl>
+                <p class="supporting">{c.fieldsHint}</p>
+                <div id="metadata-fields" class="metadata-fields"></div>
+                <p id="no-results" class="supporting" hidden>
+                  {c.noResults}
+                </p>
               </details>
-              <section class="result-section">
-                <h3>{c.coverage}</h3>
-                <p id="coverage" data-user-content></p>
+              <details id="protected" hidden>
+                <summary>{mode === 'cleaner' ? c.locked : c.structure}</summary>
+                <p class="supporting">
+                  {mode === 'cleaner' ? c.lockedHint : c.structureHint}
+                </p>
+                <dl id="protected-list" class="facts" data-user-content></dl>
+              </details>
+              <details class="inspection-details">
+                <summary>{c.coverage}</summary>
+                <p id="coverage"></p>
+                <p id="parser-warnings" data-user-content hidden></p>
+                <p class="supporting">{c.binaryHint}</p>
                 <h3>{c.warning}</h3>
                 <p id="limits">{c.faqReaderText}</p>
-              </section>
-              <div class="form-actions">
-                <button id="report" type="button" class="clear-button">
-                  {c.downloadReport}
-                </button>
-              </div>
+              </details>
             </div>
           </section>
         </div>
