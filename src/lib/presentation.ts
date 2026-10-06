@@ -48,15 +48,31 @@ export function originFacts(fields: Entry[], lang: 'vi' | 'en'): Entry[] {
   );
   add(
     lang === 'vi' ? 'Loại nguồn được khai báo' : 'Declared source type',
-    values(
-      /(digitalSourceType|DigitalSourceType|ContainsAiGeneratedContent)$/,
-    ).map((value) => {
+    values(/(digitalSourceType|DigitalSourceType)$/).map((value) => {
       if (value.endsWith('/trainedAlgorithmicMedia'))
         return lang === 'vi' ? 'Ảnh được tạo bằng AI' : 'AI-generated image';
       if (value.endsWith('/compositeWithTrainedAlgorithmicMedia'))
         return lang === 'vi'
           ? 'Ảnh kết hợp nội dung được tạo bằng AI'
           : 'Composite with AI-generated content';
+      if (value.endsWith('/composite'))
+        return lang === 'vi' ? 'Ảnh ghép' : 'Composite image';
+      return value;
+    }),
+  );
+  add(
+    lang === 'vi' ? 'Nội dung AI được khai báo' : 'Declared AI content',
+    values(/\.ContainsAiGeneratedContent$/).map((value) => {
+      if (value.toLowerCase() === 'yes')
+        return lang === 'vi'
+          ? 'Có nội dung được tạo bằng AI'
+          : 'Contains AI-generated content';
+      if (value.toLowerCase() === 'no')
+        return lang === 'vi'
+          ? 'Không có nội dung được tạo bằng AI'
+          : 'Contains no AI-generated content';
+      if (value.toLowerCase() === 'unknown')
+        return lang === 'vi' ? 'Chưa được xác định' : 'Not determined';
       return value;
     }),
   );

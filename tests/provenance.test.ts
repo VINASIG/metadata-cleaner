@@ -5,7 +5,11 @@ import { readMetadata, flatten } from '../src/lib/metadata.ts';
 import { clean } from '../src/lib/container.ts';
 import { decodeCbor } from '../src/lib/cbor.ts';
 import { readContentCredentials } from '../src/lib/jumbf.ts';
-import { recordedActions, summarizeBlocks } from '../src/lib/presentation.ts';
+import {
+  originFacts,
+  recordedActions,
+  summarizeBlocks,
+} from '../src/lib/presentation.ts';
 import { uniqueFields } from '../src/lib/fields.ts';
 import { jpegSegment } from '../src/lib/exif.ts';
 import { join, view } from '../src/lib/binary.ts';
@@ -168,6 +172,49 @@ await test('APP11 packet assembly reads C2PA and detects missing continuation pa
     join([source.subarray(0, 2), second, source.subarray(2)]),
   );
   assert(missing.warnings.includes('c2pa-container'));
+});
+await test('AI content flags remain distinct from declared source types and preserve original values', () => {
+  const fields = [
+    { key: 'xmp.ContainsAiGeneratedContent', value: 'Yes' },
+    {
+      key: 'xmp.DigitalSourceType',
+      value:
+        'http://cv.iptc.org/newscodes/digitalsourcetype/compositeWithTrainedAlgorithmicMedia',
+    },
+    {
+      key: 'c2pa.manifest[1].digitalSourceType',
+      value: 'http://cv.iptc.org/newscodes/digitalsourcetype/composite',
+    },
+  ];
+  const before = structuredClone(fields);
+  for (const [lang, sourceLabel, sourceValue, flagLabel, flagValue] of [
+    [
+      'vi',
+      'Loại nguồn được khai báo',
+      'Ảnh kết hợp nội dung được tạo bằng AI\nẢnh ghép',
+      'Nội dung AI được khai báo',
+      'Có nội dung được tạo bằng AI',
+    ],
+    [
+      'en',
+      'Declared source type',
+      'Composite with AI-generated content\nComposite image',
+      'Declared AI content',
+      'Contains AI-generated content',
+    ],
+  ] as const) {
+    const facts = originFacts(fields, lang);
+    assert.equal(
+      facts.find((field) => field.key === sourceLabel)?.value,
+      sourceValue,
+    );
+    assert.equal(
+      facts.find((field) => field.key === flagLabel)?.value,
+      flagValue,
+    );
+    assert(!facts.some((field) => field.value === 'Yes'));
+  }
+  assert.deepEqual(fields, before);
 });
 await test('hundreds of repeated image chunks are summarized without losing counts or offsets', () => {
   const blocks = Array.from({ length: 1000 }, (_item, i) => ({
