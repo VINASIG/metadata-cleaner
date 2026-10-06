@@ -16,6 +16,12 @@ export function createMetadataView(lang: Language): {
     throw new Error('Missing metadata view');
   let fields: Entry[] = [];
   let active = 'All';
+  let page = 0;
+  let pages = 1;
+  const pageSize = 25;
+  const pagers = document.querySelectorAll<HTMLElement>(
+    '[data-metadata-pages]',
+  );
   const groupNames: Record<string, string> = {
     All: c.allGroups,
     Technical: c.technical,
@@ -129,6 +135,7 @@ export function createMetadataView(lang: Language): {
         );
       button.addEventListener('click', () => {
         active = name;
+        page = 0;
         draw();
         // Rebuilding filters must not lose keyboard focus.
         for (const candidate of groups.querySelectorAll<HTMLButtonElement>(
@@ -141,17 +148,47 @@ export function createMetadataView(lang: Language): {
     }
     count.textContent =
       lang === 'vi'
-        ? `Hiển thị ${String(matches.length)} trong ${String(fields.length)} trường`
-        : `Showing ${String(matches.length)} of ${String(fields.length)} fields`;
+        ? `${String(matches.length)} trường phù hợp trong ${String(fields.length)} trường`
+        : `${String(matches.length)} matching fields of ${String(fields.length)} total`;
+    pages = Math.max(1, Math.ceil(matches.length / pageSize));
+    page = Math.min(page, pages - 1);
+    const ordered = available.flatMap((name) =>
+      matches.filter((field) => groupOf(field) === name),
+    );
+    const visible = ordered.slice(page * pageSize, (page + 1) * pageSize);
+    for (const pager of pagers) {
+      pager.hidden = pages === 1;
+      const range = pager.querySelector('[data-page-range]');
+      const number = pager.querySelector('[data-page-number]');
+      if (range)
+        range.textContent =
+          lang === 'vi'
+            ? `Trường ${String(page * pageSize + 1)} đến ${String(page * pageSize + visible.length)} trong ${String(matches.length)} trường phù hợp`
+            : `Fields ${String(page * pageSize + 1)} to ${String(page * pageSize + visible.length)} of ${String(matches.length)} matches`;
+      if (number)
+        number.textContent =
+          lang === 'vi'
+            ? `Trang ${String(page + 1)} trong ${String(pages)}`
+            : `Page ${String(page + 1)} of ${String(pages)}`;
+      for (const button of pager.querySelectorAll<HTMLButtonElement>(
+        '[data-page-action]',
+      )) {
+        const action = button.dataset['pageAction'];
+        button.disabled =
+          action === 'first' || action === 'previous'
+            ? page === 0
+            : page === pages - 1;
+      }
+    }
     container.replaceChildren();
     empty.hidden = matches.length > 0;
     for (const name of available) {
-      const rows = matches.filter((field) => groupOf(field) === name);
+      const rows = visible.filter((field) => groupOf(field) === name);
       if (!rows.length) continue;
       const section = document.createElement('section');
       section.className = 'metadata-group';
       const heading = document.createElement('h3');
-      heading.textContent = groupLabel(name) + ' - ' + String(rows.length);
+      heading.textContent = groupLabel(name);
       section.append(heading);
       const dl = document.createElement('dl');
       dl.className = 'metadata-table';
@@ -228,10 +265,36 @@ export function createMetadataView(lang: Language): {
       container.append(section);
     }
   }
-  search.addEventListener('input', draw);
+  search.addEventListener('input', () => {
+    page = 0;
+    draw();
+  });
+  for (const pager of pagers)
+    for (const button of pager.querySelectorAll<HTMLButtonElement>(
+      '[data-page-action]',
+    ))
+      button.addEventListener('click', () => {
+        const action = button.dataset['pageAction'];
+        page =
+          action === 'first'
+            ? 0
+            : action === 'previous'
+              ? Math.max(0, page - 1)
+              : action === 'last'
+                ? pages - 1
+                : Math.min(pages - 1, page + 1);
+        draw();
+        // Page changes return to the persistent upper controls, including by keyboard.
+        const target = pagers[0]?.querySelector<HTMLButtonElement>(
+          `[data-page-action="${button.disabled ? (page === 0 ? 'next' : 'previous') : (action ?? 'next')}"]`,
+        );
+        target?.focus({ preventScroll: true });
+        pagers[0]?.scrollIntoView({ block: 'start' });
+      });
   return {
     render(value) {
       fields = value;
+      page = 0;
       if (
         active !== 'All' &&
         !fields.some((field) => groupOf(field) === active)
@@ -242,11 +305,14 @@ export function createMetadataView(lang: Language): {
     reset() {
       fields = [];
       active = 'All';
+      page = 0;
+      pages = 1;
       search.value = '';
       container.replaceChildren();
       groups.replaceChildren();
       count.textContent = '';
       empty.hidden = true;
+      for (const pager of pagers) pager.hidden = true;
     },
   };
 }

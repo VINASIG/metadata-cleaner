@@ -1,0 +1,107 @@
+.metadata-tools {
+  display: block;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.metadata-tools h2 {
+  margin: 0 0 0.5rem;
+}
+
+.metadata-tools > p {
+  max-width: 52rem;
+  margin: 0 0 1.25rem;
+}
+
+.metadata-tool-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.metadata-tool-list li {
+  min-width: 0;
+}
+
+.metadata-tool-card {
+  display: flex;
+  align-items: start;
+  gap: 0.875rem;
+  height: 100%;
+  min-height: 44px;
+  padding: 1.25rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.metadata-tool-card[aria-current='page'] {
+  border-color: var(--color-info-border);
+  background: var(--color-info-background);
+}
+
+a.metadata-tool-card:hover {
+  border-color: var(--color-info);
+  background: var(--color-surface-hover);
+}
+
+a.metadata-tool-card:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+.metadata-tool-icon,
+.metadata-tool-arrow {
+  flex: none;
+  color: var(--color-info);
+}
+
+.metadata-tool-icon {
+  display: inline-flex;
+  margin-top: 0.125rem;
+}
+
+.metadata-tool-arrow {
+  margin-inline-start: auto;
+}
+
+.metadata-tool-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.metadata-tool-title,
+.metadata-tool-description {
+  display: block;
+}
+
+.metadata-tool-title {
+  font-weight: 600;
+}
+
+.metadata-tool-description {
+  margin-top: 0.5rem;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.metadata-tool-current {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.75rem;
+  font-size: var(--font-size-small);
+  color: var(--color-info);
+}
+
+@media (forced-colors: active) {
+  .metadata-tool-card[aria-current='page'] {
+    border-color: Highlight;
+  }
+}

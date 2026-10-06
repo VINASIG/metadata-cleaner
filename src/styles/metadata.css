@@ -122,16 +122,6 @@ fieldset {
   font-size: var(--font-size-small);
 }
 
-.tool-choice {
-  margin-top: 1.5rem;
-}
-
-.tool-choice a {
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-}
-
 .sr-only {
   position: absolute;
   width: 1px;
@@ -404,7 +394,7 @@ button.clear-button {
 
 .metadata-row {
   display: grid;
-  grid-template-columns: minmax(0, 19rem) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 30%) minmax(0, 1fr);
   gap: 1rem 1.5rem;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--color-border);
@@ -468,6 +458,40 @@ button.clear-button {
 
 .tag-details p {
   margin-block: 0.5rem;
+}
+
+.metadata-pagination {
+  display: block;
+  margin-block: 1.25rem;
+  padding: 1rem;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  scroll-margin-top: 1rem;
+}
+
+.metadata-pagination[hidden] {
+  display: none;
+}
+
+.metadata-pagination > p {
+  margin: 0 0 0.75rem;
+}
+
+.metadata-page-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.metadata-page-number {
+  padding-inline: 0.5rem;
+  font-size: var(--font-size-small);
+}
+
+.metadata-page-actions button {
+  min-width: 44px;
 }
 
 .history-list {

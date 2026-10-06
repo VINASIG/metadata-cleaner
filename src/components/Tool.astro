@@ -1,10 +1,12 @@
 ---
 import { Upload, Download, Trash, FileSearch } from '@lucide/astro';
 import SiteFooter from './SiteFooter.astro';
+import MetadataTools from './MetadataTools.astro';
+import MetadataPager from './MetadataPager.astro';
 import SitePreferences from './SitePreferences.astro';
 import ThemeInit from './ThemeInit.astro';
 import { copy } from '../lib/copy.ts';
-import { mode, origin, repository, companion } from '../lib/site.ts';
+import { mode, origin, repository } from '../lib/site.ts';
 import '../styles/tokens.css';
 import '../styles/app.css';
 import '../styles/control-surfaces.css';
@@ -362,7 +364,9 @@ const schema = {
                 ></nav>
                 <p id="field-count" class="supporting" aria-live="polite"></p>
                 <p class="supporting">{c.fieldsHint}</p>
+                <MetadataPager lang={lang} position="above" />
                 <div id="metadata-fields" class="metadata-fields"></div>
+                <MetadataPager lang={lang} position="below" />
                 <p id="no-results" class="supporting" hidden>
                   {c.noResults}
                 </p>
@@ -407,15 +411,8 @@ const schema = {
             <summary>{c.faqReader}</summary>
             <p>{c.faqReaderText}</p>
           </details>
-          <nav
-            class="tool-choice"
-            aria-label={lang === 'vi' ? 'Công cụ liên quan' : 'Related tool'}
-          >
-            <a href={companion + (lang === 'en' ? 'en/' : '')}>
-              {mode === 'cleaner' ? c.companionReader : c.companionCleaner}
-            </a>
-          </nav>
         </section>
+        <MetadataTools lang={lang} active={mode} />
       </main>
       <SiteFooter
         lang={lang}

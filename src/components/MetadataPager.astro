@@ -1,0 +1,71 @@
+---
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from '@lucide/astro';
+interface Props {
+  lang: 'vi' | 'en';
+  position: 'above' | 'below';
+}
+const { lang, position } = Astro.props;
+const c =
+  lang === 'vi'
+    ? {
+        first: 'Trang đầu',
+        previous: 'Trang trước',
+        next: 'Trang sau',
+        last: 'Trang cuối',
+        above: 'Phân trang phía trên kết quả',
+        below: 'Phân trang phía dưới kết quả',
+      }
+    : {
+        first: 'First page',
+        previous: 'Previous page',
+        next: 'Next page',
+        last: 'Last page',
+        above: 'Pages above results',
+        below: 'Pages below results',
+      };
+---
+
+<nav
+  class="metadata-pagination"
+  data-metadata-pages
+  aria-label={c[position]}
+  hidden
+>
+  <p class="supporting" data-page-range></p>
+  <div class="metadata-page-actions">
+    <button
+      type="button"
+      class="clear-button"
+      data-page-action="first"
+      aria-label={c.first}
+    >
+      <ChevronsLeft size={20} aria-hidden="true" />
+    </button>
+    <button type="button" class="clear-button" data-page-action="previous">
+      <ChevronLeft size={20} aria-hidden="true" />
+      {c.previous}
+    </button>
+    <span
+      class="metadata-page-number"
+      data-page-number
+      aria-live={position === 'above' ? 'polite' : 'off'}
+    ></span>
+    <button type="button" class="clear-button" data-page-action="next">
+      {c.next}
+      <ChevronRight size={20} aria-hidden="true" />
+    </button>
+    <button
+      type="button"
+      class="clear-button"
+      data-page-action="last"
+      aria-label={c.last}
+    >
+      <ChevronsRight size={20} aria-hidden="true" />
+    </button>
+  </div>
+</nav>

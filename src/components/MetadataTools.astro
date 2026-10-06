@@ -1,0 +1,112 @@
+---
+import {
+  FileSearch,
+  Eraser,
+  FilePenLine,
+  ArrowUpRight,
+  Check,
+} from '@lucide/astro';
+import '../styles/metadata-tools.css';
+interface Props {
+  lang: 'vi' | 'en';
+  active: 'reader' | 'cleaner' | 'editor';
+}
+const { lang, active } = Astro.props;
+const c =
+  lang === 'vi'
+    ? {
+        title: 'Bộ công cụ metadata',
+        hint: 'Đọc thông tin, xóa dữ liệu riêng tư hoặc chỉnh sửa XMP. File được xử lý ngay trong trình duyệt.',
+        current: 'Đang sử dụng',
+        reader: [
+          'Đọc metadata',
+          'Xem thông tin được nhúng trong ảnh và các loại file được hỗ trợ.',
+        ],
+        cleaner: [
+          'Xóa metadata ảnh',
+          'Bỏ các thông tin tùy chọn và giữ nguyên dữ liệu ảnh đã nén.',
+        ],
+        editor: [
+          'Chỉnh sửa metadata ảnh',
+          'Thêm, sửa hoặc xóa các trường XMP trong JPEG, PNG và WebP.',
+        ],
+      }
+    : {
+        title: 'Metadata tools',
+        hint: 'Read information, remove private data or edit XMP. Files are processed in your browser.',
+        current: 'You are here',
+        reader: [
+          'Read metadata',
+          'Inspect embedded information in images and other supported files.',
+        ],
+        cleaner: [
+          'Remove image metadata',
+          'Remove optional information and preserve compressed image data.',
+        ],
+        editor: [
+          'Edit image metadata',
+          'Add, change or remove XMP fields in JPEG, PNG and WebP.',
+        ],
+      };
+const tools = [
+  {
+    id: 'reader',
+    origin: 'https://metadata.vinasig.io.vn/',
+    Icon: FileSearch,
+    copy: c.reader,
+  },
+  {
+    id: 'cleaner',
+    origin: 'https://clean.vinasig.io.vn/',
+    Icon: Eraser,
+    copy: c.cleaner,
+  },
+  {
+    id: 'editor',
+    origin: 'https://edit.vinasig.io.vn/',
+    Icon: FilePenLine,
+    copy: c.editor,
+  },
+];
+---
+
+<nav class="metadata-tools" aria-labelledby="metadata-tools-title">
+  <h2 id="metadata-tools-title">{c.title}</h2>
+  <p class="supporting">{c.hint}</p>
+  <ul class="metadata-tool-list">
+    {tools.map(({ id, origin, Icon, copy: text }) => {
+      const current = active === id;
+      const Tag = current ? 'div' : 'a';
+      return (
+        <li>
+          <Tag
+            class="metadata-tool-card"
+            href={current ? undefined : origin + (lang === 'en' ? 'en/' : '')}
+            aria-current={current ? 'page' : undefined}
+          >
+            <span class="metadata-tool-icon">
+              <Icon size={24} aria-hidden="true" />
+            </span>
+            <span class="metadata-tool-copy">
+              <span class="metadata-tool-title">{text[0]}</span>
+              <span class="metadata-tool-description">{text[1]}</span>
+              {current && (
+                <span class="metadata-tool-current">
+                  <Check size={16} aria-hidden="true" />
+                  {c.current}
+                </span>
+              )}
+            </span>
+            {!current && (
+              <ArrowUpRight
+                class="metadata-tool-arrow"
+                size={20}
+                aria-hidden="true"
+              />
+            )}
+          </Tag>
+        </li>
+      );
+    })}
+  </ul>
+</nav>
