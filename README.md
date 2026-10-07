@@ -9,3 +9,5 @@ Read [product behavior and limits](docs/PRODUCT.md) and [primary format sources]
 Use Node 24.21.0 and npm 12.2.0. Install the locked dependencies, then run npm run check, npm test, npm run build, npm run test:browser and npm run test:performance. npm run dev starts a development server. npm run preview serves the checked static output. Browser tests require the pinned Playwright browsers. Files and evidence are kept out of Git under output/.
 
 The reviewed [VINASIG Agent Standards](docs/STANDARDS.md), shared website chrome and byte-preserved original brand assets are adopted. Software is AGPL-3.0-or-later, authored prose CC-BY-SA-4.0, fonts OFL-1.1 and marks follow the separate [brand policy](BRAND_POLICY.md). See [license scopes](LICENSES.md). Users' files and generated outputs retain their own rights.
+
+System defaults and shared deliberate theme/language choices follow [the ecosystem preference contract](docs/LOCALIZATION.md). Active work is preserved when another tab changes language.

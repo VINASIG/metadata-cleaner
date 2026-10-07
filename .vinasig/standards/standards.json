@@ -364,6 +364,15 @@
       "exceptions": "Current task authorization persists. Never invent third-party rights. Record purpose-based license exceptions and unresolved human review."
     },
     {
+      "id": "WEB-010",
+      "scope": "web",
+      "level": "MUST",
+      "summary": "Complete interface acceptance across modes, input errors, layout and state transitions",
+      "verification": ["automatic", "agent", "human"],
+      "evidence": "Reported-defect mapping, explicit state/control inventory, structural diagnostics, product behavior regressions, opened before/after images for every changed major mode and difficult state, exact deployed revision and affected live interactions",
+      "exceptions": "Absent categories are NOT_APPLICABLE with a reason. Helpers and test counts do not certify visual review, usability or unavailable device/assistive checks."
+    },
+    {
       "id": "WEB-009",
       "scope": "web",
       "level": "MUST",
@@ -371,6 +380,15 @@
       "verification": ["automatic", "agent", "human"],
       "evidence": "Reviewed source revision/digest, every layout route and locale/theme, header/footer screenshots, geometry/link/keyboard/no-JavaScript/enlarged-text regressions and deployed revision",
       "exceptions": "Product navigation and focused content width remain independent. A shared-chrome exception needs an owner-approved reason and review date."
+    },
+    {
+      "id": "WEB-011",
+      "scope": "web",
+      "level": "MUST",
+      "summary": "System defaults and synchronized VINASIG theme and language preferences",
+      "verification": ["automatic", "agent", "human"],
+      "evidence": "Reviewed canonical runtime digest, real HTTPS subdomain interoperability, system/manual/blocked preferences, existing-data preservation, locale discovery and deployed receipts",
+      "exceptions": "Global sharing applies only within the same browser profile on HTTPS vinasig.io.vn. Denied cookies, local hosts and offline files use local or volatile fallback. Active tabs defer language navigation until explicit navigation or reload."
     }
   ]
 }
