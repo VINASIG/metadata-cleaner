@@ -29,6 +29,8 @@ const search = element('#search', HTMLInputElement);
 const processButton = document.querySelector<HTMLButtonElement>('#process');
 const download = document.querySelector<HTMLButtonElement>('#download');
 const filename = document.querySelector<HTMLInputElement>('#filename');
+const workflow = document.querySelector<HTMLElement>('#workflow-actions');
+const workspace = element('#tool');
 let file: File | null = null;
 let summary: Summary | null = null;
 let metadata: Metadata | null = null;
@@ -76,6 +78,9 @@ function clearOutput(): void {
   reportData = sourceResponse;
   if (download) download.disabled = true;
   show('#clean-result', false);
+  show('#name-error', false);
+  filename?.removeAttribute('aria-invalid');
+  processButton?.classList.replace('clear-button', 'primary');
   processedMetadata = null;
   const processedView =
     document.querySelector<HTMLButtonElement>('#view-processed');
@@ -108,8 +113,15 @@ function reset(): void {
   fileInput.value = '';
   search.value = '';
   clear.disabled = true;
+  workspace.dataset['fileLoaded'] = 'false';
+  element('#file-label').textContent = c.choose;
+  if (workflow) element('#workflow-file-name').textContent = '';
+  show('#workflow-actions', false);
+  if (processButton) processButton.disabled = true;
   show('#selection', false);
   show('#file-info', false);
+  show('#dimension-fact', false);
+  element('#file-dimensions').textContent = '';
   show('#result', false);
   show('#empty-result', true);
   show('#protected', false);
@@ -127,7 +139,7 @@ function selected(): string[] {
   ].map((input) => input.value);
 }
 function updateSavings(): void {
-  if (!summary) return;
+  if (!summary || mode !== 'cleaner') return;
   const ids = new Set(selected());
   const saved = summary.blocks
     .filter((block) => ids.has(block.id))
@@ -137,6 +149,24 @@ function updateSavings(): void {
     );
   const node = document.querySelector('#potential-savings');
   if (node) node.textContent = c.potential + ' - ' + size(saved);
+  const total = summary.blocks.filter(
+    (block) => block.reason === 'metadata',
+  ).length;
+  element('#selection-count').textContent = c.selectionSummary
+    .replace('{selected}', String(ids.size))
+    .replace('{total}', String(total));
+  element('#selection-state').textContent =
+    total === 0
+      ? c.noBlocks
+      : ids.size === 0
+        ? c.nothingSelected
+        : c.originalSafe;
+  element('#process-label').textContent =
+    ids.size === 0 ? c.createCopy : c.remove;
+  const all = element('#all', HTMLButtonElement);
+  const none = element('#none', HTMLButtonElement);
+  all.disabled = ids.size === total;
+  none.disabled = ids.size === 0;
 }
 function renderChoices(value: Summary): void {
   if (mode !== 'cleaner') return;
@@ -180,10 +210,12 @@ function renderChoices(value: Summary): void {
       clearOutput();
       if (sourceMetadata) renderMetadata(sourceMetadata);
       updateSavings();
+      setStatus(c.ready);
       if (processButton) processButton.disabled = false;
     });
   }
-  show('#selection', true);
+  show('#selection', removable.length > 0);
+  show('#workflow-actions', true);
   if (processButton) processButton.disabled = false;
   updateSavings();
 }
@@ -368,6 +400,7 @@ function updateName(): boolean {
     name.toLowerCase().endsWith('.' + extension(summary)) &&
     !/[. ]$/.test(name);
   filename.setAttribute('aria-invalid', String(!valid));
+  show('#name-error', !valid);
   download.disabled = !valid || !output;
   return valid;
 }
@@ -388,6 +421,10 @@ async function run(operation: 'inspect' | 'clean'): Promise<void> {
   clearOutput();
   if (processButton) processButton.disabled = true;
   setStatus(operation === 'inspect' ? c.loading : c.working);
+  if (operation === 'clean') {
+    element('#process-label').textContent = c.working;
+    element('#selection-state').textContent = c.working;
+  }
   try {
     const buffer = await file.arrayBuffer();
     if (current !== revision) return;
@@ -399,13 +436,15 @@ async function run(operation: 'inspect' | 'clean'): Promise<void> {
       revision++;
       stop();
       setStatus(c.errors.timeout, true);
-      if (processButton) processButton.disabled = false;
+      updateSavings();
+      if (processButton) processButton.disabled = !summary;
     }, 20000);
     worker.onerror = () => {
       if (current !== revision) return;
       stop();
       setStatus(c.errors.failed, true);
-      if (processButton) processButton.disabled = false;
+      updateSavings();
+      if (processButton) processButton.disabled = !summary;
     };
     worker.onmessage = (event: MessageEvent<Response>): void => {
       if (current !== revision) return;
@@ -413,7 +452,8 @@ async function run(operation: 'inspect' | 'clean'): Promise<void> {
       const response = event.data;
       if (!response.ok) {
         setStatus(c.errors[response.error], true);
-        if (processButton) processButton.disabled = false;
+        updateSavings();
+        if (processButton) processButton.disabled = !summary;
         return;
       }
       reportData = response;
@@ -485,7 +525,15 @@ async function run(operation: 'inspect' | 'clean'): Promise<void> {
           image.src = previewUrl;
         }
         setStatus(c.done);
-        if (processButton) processButton.disabled = false;
+        if (processButton) {
+          processButton.disabled = false;
+          processButton.classList.replace('primary', 'clear-button');
+          element('#process-label').textContent = c.processAgain;
+          element('#selection-state').textContent = c.outputReady;
+        }
+        const resultHeading = element('#clean-result-title');
+        resultHeading.focus({ preventScroll: true });
+        resultHeading.scrollIntoView({ block: 'start', behavior: 'instant' });
       }
     };
     const request: Request = {
@@ -501,7 +549,8 @@ async function run(operation: 'inspect' | 'clean'): Promise<void> {
     if (current === revision) {
       stop();
       setStatus(c.errors.failed, true);
-      if (processButton) processButton.disabled = false;
+      updateSavings();
+      if (processButton) processButton.disabled = !summary;
     }
   }
 }
@@ -519,6 +568,9 @@ function choose(files: FileList | File[]): void {
     return;
   }
   file = chosen;
+  workspace.dataset['fileLoaded'] = 'true';
+  element('#file-label').textContent = c.replaceFile;
+  if (workflow) element('#workflow-file-name').textContent = file.name;
   clear.disabled = false;
   facts('#file-facts', [
     { key: c.fileName, value: file.name },
@@ -540,7 +592,10 @@ fileInput.addEventListener('change', () => {
   if (fileInput.files) choose(fileInput.files);
 });
 fileInput.disabled = false;
-clear.addEventListener('click', reset);
+clear.addEventListener('click', () => {
+  reset();
+  fileInput.focus();
+});
 processButton?.addEventListener('click', () => {
   void run('clean');
 });
@@ -628,6 +683,7 @@ for (const [id, checked] of [
       ))
         input.checked = checked;
       updateSavings();
+      setStatus(c.ready);
       if (processButton) processButton.disabled = false;
     });
 }

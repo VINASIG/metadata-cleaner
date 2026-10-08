@@ -1,5 +1,5 @@
 ---
-import { Upload, Download, Trash, FileSearch } from '@lucide/astro';
+import { Upload, Download, Trash, FileSearch, Eraser } from '@lucide/astro';
 import SiteFooter from './SiteFooter.astro';
 import MetadataTools from './MetadataTools.astro';
 import MetadataPager from './MetadataPager.astro';
@@ -131,7 +131,7 @@ const schema = {
             <div id="dropzone" class="dropzone">
               <label class="file-trigger">
                 <Upload size={20} aria-hidden="true" />
-                {c.choose}
+                <span id="file-label">{c.choose}</span>
                 <input
                   id="file"
                   type="file"
@@ -145,9 +145,14 @@ const schema = {
             </div>
             <div class="input-feedback">
               <p class="supporting privacy">{c.privacy}</p>
-              <button type="button" id="clear" class="clear-button" disabled>
+              <button
+                type="button"
+                id="clear"
+                class="clear-button danger-button"
+                disabled
+              >
                 <Trash size={18} aria-hidden="true" />
-                {c.clear}
+                <span>{c.clear}</span>
               </button>
             </div>
             <p id="status" class="status" role="status" aria-live="polite">
@@ -156,80 +161,6 @@ const schema = {
             <noscript>
               <p>{c.noScript}</p>
             </noscript>
-            <section
-              id="file-info"
-              class="file-info"
-              aria-labelledby="overview-title"
-              hidden
-            >
-              <h2 id="overview-title" class="sr-only">
-                {c.overview}
-              </h2>
-              <div class="file-overview">
-                <figure id="source-figure" hidden>
-                  <img
-                    id="source-preview"
-                    src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-                    alt={c.originalPreview}
-                    hidden
-                  />
-                  <figcaption class="supporting">
-                    {c.originalPreview}
-                  </figcaption>
-                </figure>
-                <div class="file-summary">
-                  <h2 id="selected-file-name" data-user-content>
-                    {c.overview}
-                  </h2>
-                  <dl class="summary-facts">
-                    <div>
-                      <dt>{c.format}</dt>
-                      <dd id="file-format" data-user-content></dd>
-                    </div>
-                    <div>
-                      <dt>{c.fileSize}</dt>
-                      <dd id="file-size" data-user-content></dd>
-                    </div>
-                    <div id="dimension-fact" hidden>
-                      <dt>{c.dimensions}</dt>
-                      <dd id="file-dimensions" data-user-content></dd>
-                    </div>
-                    <div>
-                      <dt>{c.metadataTitle}</dt>
-                      <dd id="file-tags"></dd>
-                    </div>
-                  </dl>
-                  <details class="browser-details">
-                    <summary>{c.browserInfo}</summary>
-                    <p class="supporting">{c.browserInfoHint}</p>
-                    <dl id="file-facts" class="facts" data-user-content></dl>
-                  </details>
-                </div>
-              </div>
-              <section
-                id="origin"
-                class="origin"
-                aria-labelledby="origin-title"
-                hidden
-              >
-                <h3 id="origin-title">{c.origin}</h3>
-                <p id="credentials-note" class="credential-note" hidden>
-                  <strong>{c.credentials}</strong> {c.credentialsHint}
-                </p>
-                <dl id="origin-facts" class="facts" data-user-content></dl>
-                <p id="origin-empty" class="supporting" hidden>
-                  {c.originEmpty}
-                </p>
-                <details id="history" hidden>
-                  <summary>{c.history}</summary>
-                  <ol
-                    id="recorded-actions"
-                    class="history-list"
-                    data-user-content
-                  ></ol>
-                </details>
-              </section>
-            </section>
           </section>
           {mode === 'cleaner' && (
             <section
@@ -254,15 +185,177 @@ const schema = {
               <fieldset id="choices">
                 <legend class="sr-only">{c.selection}</legend>
               </fieldset>
-              <p id="potential-savings" class="supporting"></p>
-              <button id="process" class="primary" type="button" disabled>
-                {c.remove}
+            </section>
+          )}
+          {mode === 'cleaner' && (
+            <section
+              id="workflow-actions"
+              class="workflow-actions"
+              aria-label={c.cleanActions}
+              hidden
+            >
+              <div class="workflow-summary">
+                <div class="workflow-file">
+                  <p
+                    id="workflow-file-name"
+                    class="supporting"
+                    data-user-content
+                  ></p>
+                  <p
+                    id="selection-count"
+                    class="selection-count"
+                    aria-live="polite"
+                  ></p>
+                </div>
+                <p id="potential-savings" class="supporting"></p>
+                <p id="selection-state" class="supporting"></p>
+              </div>
+              <button
+                id="process"
+                class="primary"
+                type="button"
+                aria-describedby="selection-state"
+                disabled
+              >
+                <Eraser size={20} aria-hidden="true" />
+                <span id="process-label">{c.remove}</span>
               </button>
             </section>
           )}
+          {mode === 'cleaner' && (
+            <section
+              id="clean-result"
+              aria-labelledby="clean-result-title"
+              hidden
+            >
+              <h2 id="clean-result-title" tabindex="-1">
+                {c.outputTitle}
+              </h2>
+              <p class="supporting">{c.done}</p>
+              <div class="processed-overview">
+                <div>
+                  <dl id="sizes" class="facts size-facts"></dl>
+                  <label for="filename">{c.filename}</label>
+                  <input
+                    type="text"
+                    id="filename"
+                    maxlength="120"
+                    aria-describedby="name-help name-error"
+                    autocomplete="off"
+                    spellcheck="false"
+                  />
+                  <p id="name-help" class="supporting">
+                    {c.filenameHint}
+                  </p>
+                  <p id="name-error" class="field-error" hidden>
+                    {c.errors.name}
+                  </p>
+                  <div class="form-actions download-actions">
+                    <button
+                      id="download"
+                      class="primary"
+                      type="button"
+                      disabled
+                    >
+                      <Download size={18} aria-hidden="true" />
+                      <span>{c.download}</span>
+                    </button>
+                  </div>
+                  <p id="kept-choice" class="supporting"></p>
+                </div>
+                <img
+                  id="image-preview"
+                  src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                  alt={c.preview}
+                  hidden
+                />
+              </div>
+              <p id="preview-unavailable" class="supporting" hidden>
+                {c.previewUnavailable}
+              </p>
+              <details id="verification">
+                <summary>{c.details}</summary>
+                <p>{c.same}</p>
+                <h3>{c.hash}</h3>
+                <dl id="hashes" class="facts" data-user-content></dl>
+              </details>
+            </section>
+          )}
+          <section
+            id="file-info"
+            class="file-info"
+            aria-labelledby="overview-title"
+            hidden
+          >
+            <h2 id="overview-title" class="sr-only">
+              {c.overview}
+            </h2>
+            <div class="file-overview">
+              <figure id="source-figure" hidden>
+                <img
+                  id="source-preview"
+                  src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                  alt={c.originalPreview}
+                  hidden
+                />
+                <figcaption class="supporting">{c.originalPreview}</figcaption>
+              </figure>
+              <div class="file-summary">
+                <h2 id="selected-file-name" data-user-content>
+                  {c.overview}
+                </h2>
+                <dl class="summary-facts">
+                  <div>
+                    <dt>{c.format}</dt>
+                    <dd id="file-format" data-user-content></dd>
+                  </div>
+                  <div>
+                    <dt>{c.fileSize}</dt>
+                    <dd id="file-size" data-user-content></dd>
+                  </div>
+                  <div id="dimension-fact" hidden>
+                    <dt>{c.dimensions}</dt>
+                    <dd id="file-dimensions" data-user-content></dd>
+                  </div>
+                  <div>
+                    <dt>{c.metadataTitle}</dt>
+                    <dd id="file-tags"></dd>
+                  </div>
+                </dl>
+                <details class="browser-details">
+                  <summary>{c.browserInfo}</summary>
+                  <p class="supporting">{c.browserInfoHint}</p>
+                  <dl id="file-facts" class="facts" data-user-content></dl>
+                </details>
+              </div>
+            </div>
+            <section
+              id="origin"
+              class="origin"
+              aria-labelledby="origin-title"
+              hidden
+            >
+              <h3 id="origin-title">{c.origin}</h3>
+              <p id="credentials-note" class="credential-note" hidden>
+                <strong>{c.credentials}</strong> {c.credentialsHint}
+              </p>
+              <dl id="origin-facts" class="facts" data-user-content></dl>
+              <p id="origin-empty" class="supporting" hidden>
+                {c.originEmpty}
+              </p>
+              <details id="history" hidden>
+                <summary>{c.history}</summary>
+                <ol
+                  id="recorded-actions"
+                  class="history-list"
+                  data-user-content
+                ></ol>
+              </details>
+            </section>
+          </section>
           <section class="preview" aria-labelledby="result-title">
             <h2 id="result-title" class="sr-only">
-              {mode === 'cleaner' ? c.outputTitle : c.metadataTitle}
+              {c.metadataTitle}
             </h2>
             <p id="empty-result" class="empty-result">
               <FileSearch size={24} aria-hidden="true" />
@@ -271,53 +364,6 @@ const schema = {
             <div id="result" hidden>
               {mode === 'cleaner' && (
                 <>
-                  <div id="clean-result" hidden>
-                    <h2>{c.outputTitle}</h2>
-                    <div class="processed-overview">
-                      <div>
-                        <dl id="sizes" class="facts size-facts"></dl>
-                        <label for="filename">{c.filename}</label>
-                        <input
-                          type="text"
-                          id="filename"
-                          maxlength="120"
-                          aria-describedby="name-help"
-                          autocomplete="off"
-                          spellcheck="false"
-                        />
-                        <p id="name-help" class="supporting">
-                          {c.filenameHint}
-                        </p>
-                        <div class="form-actions">
-                          <button
-                            id="download"
-                            class="primary"
-                            type="button"
-                            disabled
-                          >
-                            <Download size={18} aria-hidden="true" />
-                            {c.download}
-                          </button>
-                        </div>
-                        <p id="kept-choice" class="supporting"></p>
-                      </div>
-                      <img
-                        id="image-preview"
-                        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-                        alt={c.preview}
-                        hidden
-                      />
-                    </div>
-                    <p id="preview-unavailable" class="supporting" hidden>
-                      {c.previewUnavailable}
-                    </p>
-                    <details id="verification">
-                      <summary>{c.details}</summary>
-                      <p>{c.same}</p>
-                      <h3>{c.hash}</h3>
-                      <dl id="hashes" class="facts" data-user-content></dl>
-                    </details>
-                  </div>
                   <div id="metadata-views" class="form-actions" hidden>
                     <button
                       id="view-original"
