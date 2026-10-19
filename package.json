@@ -40,7 +40,7 @@
     "@lucide/astro": "1.52.0",
     "@xmldom/xmldom": "0.9.12",
     "astro": "7.3.5",
-    "exifreader": "4.46.0"
+    "exifreader": "4.50.0"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
