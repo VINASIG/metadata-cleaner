@@ -37,7 +37,7 @@
     "check:licenses": "node .vinasig/standards/templates/check-licenses.mjs"
   },
   "dependencies": {
-    "@lucide/astro": "1.52.0",
+    "@lucide/astro": "1.57.0",
     "@xmldom/xmldom": "0.9.12",
     "astro": "7.3.5",
     "exifreader": "4.46.0"
